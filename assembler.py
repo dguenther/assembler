@@ -57,21 +57,26 @@ def main(argv=None):
     if argv is None:
         argv = sys.argv
         
-    # Exit if args != 2
-    # argv[0] is the name of the script you're running, so chop it off before counting
-    if (len(sys.argv[1:]) != 2):
-        sys.exit("Syntax: python assembler.py infile outfile")
+    # Exit if args != 3
+    # (argv[0] is the name of the script you're running, plus infile and outfile)
+    # Note that when calling sys.exit() with an argument, UNIX programs often use
+    # 2 for command-line syntax errors and 1 for everything else
+    if (len(sys.argv) != 3):
+        print >>sys.stderr, "Syntax: python assembler.py infile outfile"
+        return 2
 
     # Exit if args equal each other (would overwrite input file)
     if (argv[1] == argv[2]):
-        sys.exit("Error: Input and output filenames are the same!")
+        print >>sys.stderr, "Error: Input and output filenames are the same!"
+        return 2
     
     # Check if file exists, and if so, open it
     if fileExists(argv[1]):
         inFile = open(argv[1],'r')
         print "Opened %s successfully." % (argv[1])
     else:
-        sys.exit("Error: The input file could not be read!")
+        print >>sys.stderr, "Error: The input file could not be read!"
+        return 1
 
     lineNum = 0
     instructions = []
@@ -267,12 +272,12 @@ def convertSignedDecToBin(number):
         return bin(number)[2:].zfill(IMMEDIATE_BITS)
 
 def generateOutput(instructions):
-    out = '-- File created using Derek Guenther and Greg Schafer\'s assembler\n'
+    out = '-- File created using assembler.py\n'
     out += '-- %s\n' % datetime.now()
     out += 'WIDTH = %s;\n' % (INSTRUCTION_WIDTH)
     out += 'DEPTH = %s;\n\n' % (len(instructions))
     out += 'ADDRESS_RADIX = UNS;\n'
-    out += 'DATA_RADIX=BIN;\n\n'
+    out += 'DATA_RADIX = BIN;\n\n'
     out += 'CONTENT BEGIN\n'
     
     count = 0
